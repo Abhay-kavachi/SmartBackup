@@ -8,9 +8,15 @@ export const usePolling = (callback, interval, deps = []) => {
         let id = null;
         let active = true;
         const tick = async () => {
-            if (!active)
-                return;
-            await savedCallback.current();
+            if (!active) return;
+            try {
+                await savedCallback.current();
+            } catch (err) {
+                // Silently handle authentication errors during polling
+                if (err.response?.status !== 422) {
+                    console.error("Polling error:", err);
+                }
+            }
             id = window.setTimeout(tick, interval);
         };
         id = window.setTimeout(tick, interval);
@@ -19,5 +25,5 @@ export const usePolling = (callback, interval, deps = []) => {
             if (id)
                 window.clearTimeout(id);
         };
-    }, [interval]);
+    }, [interval, ...deps]);
 };

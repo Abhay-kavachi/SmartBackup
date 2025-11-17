@@ -30,6 +30,7 @@ chatbot = ChatbotService(
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_object(config)
+    app.url_map.strict_slashes = False
     CORS(app, supports_credentials=True)
 
     db.init_app(app)

@@ -1,34 +1,41 @@
 import { useEffect, useState } from "react";
 import api from "../api/client";
-const defaultState = { level: 1, charging: true };
+
+const defaultState = { level: 0, charging: false };
+
 export const useBattery = () => {
     const [state, setState] = useState(defaultState);
+
     useEffect(() => {
         let mounted = true;
-        const syncState = async (battery) => {
-            if (!mounted)
-                return;
-            const nextState = { level: battery.level, charging: battery.charging };
-            setState(nextState);
+
+        // Fetch state from backend
+        const fetchBackendState = async () => {
             try {
-                await api.post("/power/state", { level: battery.level, charging: battery.charging }, { timeout: 3000 });
-            }
-            catch {
-                // ignore
+                const { data } = await api.get("/power/state");
+                if (mounted && data.state) {
+                    setState({
+                        level: data.state.level,
+                        charging: data.state.charging
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch power state:", err);
+                // Keep default state if backend fails
             }
         };
-        const init = async () => {
-            if (!("getBattery" in navigator))
-                return;
-            const battery = await navigator.getBattery();
-            await syncState(battery);
-            battery.addEventListener("levelchange", () => syncState(battery));
-            battery.addEventListener("chargingchange", () => syncState(battery));
-        };
-        init();
+
+        // Initial fetch
+        fetchBackendState();
+
+        // Poll every 2 seconds for real-time updates
+        const interval = setInterval(fetchBackendState, 2000);
+
         return () => {
             mounted = false;
+            clearInterval(interval);
         };
     }, []);
+
     return state;
 };

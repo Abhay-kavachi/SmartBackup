@@ -12,9 +12,10 @@ def _manager():
 
 
 @backup_bp.get("/")
+@backup_bp.get("")
 @jwt_required()
 def list_jobs():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     jobs = (
         BackupJob.query.filter_by(user_id=user_id)
         .order_by(BackupJob.started_at.desc())
@@ -25,9 +26,10 @@ def list_jobs():
 
 
 @backup_bp.get("/events")
+@backup_bp.get("events")
 @jwt_required()
 def list_events():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     job_ids = {job.id for job in BackupJob.query.filter_by(user_id=user_id).all()}
     if not job_ids:
         return jsonify({"events": []})
@@ -43,7 +45,7 @@ def list_events():
 @backup_bp.post("/run")
 @jwt_required()
 def run_backup():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     payload = request.get_json() or {}
     file_id = payload.get("file_id")
 
@@ -60,7 +62,7 @@ def run_backup():
 @backup_bp.post("/schedule")
 @jwt_required()
 def schedule_backup():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     payload = request.get_json() or {}
     kind = payload.get("type", "hourly")
     scheduler = current_app.extensions["scheduler"]
