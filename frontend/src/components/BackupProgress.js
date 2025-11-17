@@ -1,0 +1,3 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+const BackupProgress = ({ value, label }) => (_jsxs("div", { className: "bg-[#161b22] border border-gray-800 rounded-2xl p-4 space-y-2", children: [_jsxs("div", { className: "flex items-center justify-between text-sm", children: [_jsx("span", { className: "font-semibold", children: label }), _jsxs("span", { className: "text-gray-400", children: [Math.round(value), "%"] })] }), _jsx("div", { className: "w-full h-2 bg-gray-800 rounded-full overflow-hidden", children: _jsx("div", { className: "h-full bg-emerald-400 transition-all", style: { width: `${value}%` } }) })] }));
+export default BackupProgress;
